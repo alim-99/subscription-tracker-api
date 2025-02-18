@@ -64,6 +64,44 @@ export const createNewUser = async (req, res, next) => {
   }
 };
 
+export const updateUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    const user = await User.findById(id);
+
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    if(!updates || Object.keys(updates).length === 0) {
+      res.status(400).json({
+        success: false,
+        message: 'No data for the updates'
+      });
+    }
+
+    Object.keys(updates).forEach((key) => {
+      user[key] = updates[key];
+    });
+
+    const updatedUser = await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'User updated successfully',
+      data: updatedUser,
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const deleteUser = async (req, res, next) => {
   try {
     const existingUser = await User.findById(req.params.id);

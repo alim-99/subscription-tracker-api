@@ -73,17 +73,54 @@ export const getUserSubscriptions = async (req, res, next) => {
   }
 };
 
+export const updateSubscription = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+    const subscription = await Subscription.findById(id);
+
+    if(!subscription) {
+      res.status(404).json({
+        success: false, 
+        message: "Subscription not found"});
+    }
+
+    if(!updates || Object.keys(updates).length === 0) {
+      res.status(400).json({
+        success: false,
+        message: 'No data for the updates'
+      });
+    }
+
+    Object.keys(updates).forEach((key) => {
+      subscription[key] = updates[key];
+    });
+
+    const updatedSubscription = await subscription.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Subscription updated successfully",
+      data: updatedSubscription
+    });
+  } catch(error) {
+    next(error);
+  }
+};
+
 export const deleteSubscription = async (req, res, next) => {
   try {
     const {id} = req.params;
     const existedSubscription = await Subscription.findById(id);
     if (!existedSubscription) {
-      res.status(404).json({success: false, message: "Subscription not found"});
+      res.status(404).json(
+        {success: false, message: "Subscription not found"});
     }
 
     const deletedSubscription = await existedSubscription.deleteOne();
 
-    res.status(200).json({success: true, message: 'Subscription deleted successfully'});
+    res.status(200).json(
+      {success: true, message: 'Subscription deleted successfully'});
   } catch(error) {
     next(error);
   }
